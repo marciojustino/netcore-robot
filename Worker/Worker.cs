@@ -34,8 +34,7 @@ namespace Worker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now.ToString("o"));
-                _logger.LogInformation("Worker interval = {interval}", _workerConfigurations.Interval);
+                _logger.LogInformation("Worker running | Interval={interval} milliseconds", _workerConfigurations.Interval);
                 await Task.Delay(_workerConfigurations.Interval, stoppingToken);
             }
         }
