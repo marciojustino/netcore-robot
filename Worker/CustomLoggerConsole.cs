@@ -1,11 +1,12 @@
-using System;
-using Microsoft.Extensions.Logging;
-
 namespace Worker
 {
+    using System;
+    using Microsoft.Extensions.Logging;
+
     public class CustomLoggerConsole : ILogger
     {
         private readonly string _categoryName;
+        private static object _MessageLock = new object();
 
         public CustomLoggerConsole(string categoryName)
         {
@@ -24,25 +25,43 @@ namespace Worker
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            if (!IsEnabled(logLevel))
+            lock (_MessageLock)
             {
-                return;
-            }
+                if (!IsEnabled(logLevel))
+                {
+                    return;
+                }
 
-            var defaultColor = Console.ForegroundColor;
-            Console.ForegroundColor = logLevel == LogLevel.Information
-            ? ConsoleColor.Blue
-            : logLevel == LogLevel.Warning
-                ? ConsoleColor.Yellow
-                : logLevel == LogLevel.Error
-                    ? ConsoleColor.DarkRed
-                    : logLevel == LogLevel.Critical
-                        ? ConsoleColor.Magenta
-                        : logLevel == LogLevel.Debug
-                            ? ConsoleColor.Green
-                            : defaultColor;
-            Console.WriteLine($"[{DateTimeOffset.Now.ToString("o")}] {logLevel}: {_categoryName}[{eventId.Id}]: {formatter(state, exception)}");
-            Console.ForegroundColor = defaultColor;
+                Console.WriteLine();
+                Console.Write("[");
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write($"{DateTimeOffset.Now.ToString("o")}");
+
+                Console.ResetColor();
+                Console.Write("]");
+
+                Console.ForegroundColor = logLevel == LogLevel.Information
+                ? ConsoleColor.Green
+                : logLevel == LogLevel.Warning
+                    ? ConsoleColor.Yellow
+                    : logLevel == LogLevel.Error
+                        ? ConsoleColor.DarkRed
+                        : logLevel == LogLevel.Critical
+                            ? ConsoleColor.Magenta
+                            : ConsoleColor.Blue;
+
+                Console.Write($" {logLevel}");
+
+                Console.ResetColor();
+                Console.Write($": {_categoryName}[");
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write($"{eventId.Id}");
+
+                Console.ResetColor();
+                Console.Write($"]: {formatter(state, exception)}");
+            }
         }
     }
 }

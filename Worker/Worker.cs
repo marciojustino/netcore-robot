@@ -32,9 +32,18 @@ namespace Worker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            if (_workerConfigurations.Interval == 0)
+            {
+                _workerConfigurations.Interval = 1000; //1 minuto for default
+            }
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running | Interval={interval} milliseconds", _workerConfigurations.Interval);
+                await Task.Factory.StartNew(async () => {
+                    await Task.Delay(4000, stoppingToken);
+                    _logger.LogInformation("Task finished {taskId}", Thread.CurrentThread.ManagedThreadId);
+                });
                 await Task.Delay(_workerConfigurations.Interval, stoppingToken);
             }
         }
