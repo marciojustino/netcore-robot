@@ -1,11 +1,15 @@
 namespace Worker
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
     using Microsoft.Extensions.Logging;
 
     public class CustomLoggerConsole : ILogger
     {
         private readonly string _categoryName;
+        public Dictionary<int, ConsoleColor> _threadsRunning { get; set; }
         private static object _MessageLock = new object();
 
         public CustomLoggerConsole(string categoryName)
@@ -25,6 +29,13 @@ namespace Worker
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
+            // var color = Console.ForegroundColor;
+            // var threadsColors = _threadsRunning.Where(t => t.Key.Equals(Thread.CurrentThread.ManagedThreadId));
+            // if (!threadsColors.Any())
+            // {
+            //     _threadsRunning.Add(Thread.CurrentThread.ManagedThreadId, ConsoleColor.)
+            // }
+
             lock (_MessageLock)
             {
                 if (!IsEnabled(logLevel))

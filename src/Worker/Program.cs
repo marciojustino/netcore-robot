@@ -4,6 +4,7 @@ namespace Worker
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Abstraction.Configurations;
+    using Domain.Services;
 
     public class Program
     {
@@ -22,6 +23,7 @@ namespace Worker
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddScoped<WorkerConfigurations>();
+                    services.AddTransient<IMyService, MyService>();
                     services.AddHostedService<Worker>();
                 });
     }

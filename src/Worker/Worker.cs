@@ -1,11 +1,9 @@
 namespace Worker
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Abstraction.Configurations;
+    using Domain.Services;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -17,6 +15,7 @@ namespace Worker
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IConfiguration _configurations;
         private readonly WorkerConfigurations _workerConfigurations;
+        private readonly IMyService _myService;
 
         public Worker(ILogger<Worker> logger,
                       IServiceScopeFactory scopeFactory)
@@ -28,23 +27,21 @@ namespace Worker
             _configurations = scope.ServiceProvider.GetRequiredService<IConfiguration>();
             _workerConfigurations = scope.ServiceProvider.GetRequiredService<WorkerConfigurations>();
             _configurations.GetSection("Worker").Bind(_workerConfigurations);
+            // Services
+            _myService = scope.ServiceProvider.GetRequiredService<IMyService>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (_workerConfigurations.Interval == 0)
-            {
-                _workerConfigurations.Interval = 1000; //1 minuto for default
-            }
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running | Interval={interval} milliseconds", _workerConfigurations.Interval);
-                await Task.Factory.StartNew(async () => {
-                    await Task.Delay(4000, stoppingToken);
-                    _logger.LogInformation("Task finished {taskId}", Thread.CurrentThread.ManagedThreadId);
+                _logger.LogTrace("[Worker__ExecuteAsync] Worker running | Interval={interval} milliseconds", _workerConfigurations.Interval);
+                await Task.Factory.StartNew(async () =>
+                {
+                    await _myService.Process();
+                    _logger.LogTrace("[Worker__ExecuteAsync] Task finished | TaskId={taskId}", Thread.CurrentThread.ManagedThreadId);
                 });
-                await Task.Delay(_workerConfigurations.Interval, stoppingToken);
+                await Task.Delay(_workerConfigurations.Interval == 0 ? 1000 : _workerConfigurations.Interval, stoppingToken);
             }
         }
     }
