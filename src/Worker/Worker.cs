@@ -36,11 +36,7 @@ namespace Worker
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogTrace("[Worker__ExecuteAsync] Worker running | Interval={interval} milliseconds", _workerConfigurations.Interval);
-                await Task.Factory.StartNew(async () =>
-                {
-                    await _myService.Process();
-                    _logger.LogTrace("[Worker__ExecuteAsync] Task finished | TaskId={taskId}", Thread.CurrentThread.ManagedThreadId);
-                });
+                await _myService.Process();
                 await Task.Delay(_workerConfigurations.Interval == 0 ? 1000 : _workerConfigurations.Interval, stoppingToken);
             }
         }

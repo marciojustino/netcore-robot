@@ -9,12 +9,31 @@ namespace Worker
     public class CustomLoggerConsole : ILogger
     {
         private readonly string _categoryName;
-        public Dictionary<int, ConsoleColor> _threadsRunning { get; set; }
+        private static Dictionary<int, ConsoleColor> _threadsRunning;
+        private static List<ConsoleColor> _colors;
         private static object _MessageLock = new object();
 
         public CustomLoggerConsole(string categoryName)
         {
             _categoryName = categoryName;
+            _threadsRunning = new Dictionary<int, ConsoleColor>();
+            _colors = new List<ConsoleColor> {
+                ConsoleColor.Blue,
+                ConsoleColor.Cyan,
+                ConsoleColor.DarkBlue,
+                ConsoleColor.DarkCyan,
+                ConsoleColor.DarkGray,
+                ConsoleColor.DarkGreen,
+                ConsoleColor.DarkMagenta,
+                ConsoleColor.DarkRed,
+                ConsoleColor.DarkYellow,
+                ConsoleColor.Gray,
+                ConsoleColor.Green,
+                ConsoleColor.Magenta,
+                ConsoleColor.Red,
+                ConsoleColor.White,
+                ConsoleColor.Yellow
+            };
         }
 
         public IDisposable BeginScope<TState>(TState state)
@@ -29,49 +48,28 @@ namespace Worker
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            // var color = Console.ForegroundColor;
-            // var threadsColors = _threadsRunning.Where(t => t.Key.Equals(Thread.CurrentThread.ManagedThreadId));
-            // if (!threadsColors.Any())
-            // {
-            //     _threadsRunning.Add(Thread.CurrentThread.ManagedThreadId, ConsoleColor.)
-            // }
+            if (!IsEnabled(logLevel))
+            {
+                return;
+            }
 
             lock (_MessageLock)
             {
-                if (!IsEnabled(logLevel))
+                var backupColor = Console.ForegroundColor;
+                var threadsColors = _threadsRunning.Where(t => t.Key.Equals(Thread.CurrentThread.ManagedThreadId));
+                if (!threadsColors.Any())
                 {
-                    return;
+                    var index = new Random().Next(0, _colors.Count);
+                    _threadsRunning.Add(Thread.CurrentThread.ManagedThreadId, _colors[index]);
+                    Console.ForegroundColor = _colors[index];
+                }
+                else
+                {
+                    Console.ForegroundColor = threadsColors.FirstOrDefault().Value;
                 }
 
-                Console.WriteLine();
-                Console.Write("[");
-
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write($"{DateTimeOffset.Now.ToString("o")}");
-
+                Console.WriteLine($"{DateTimeOffset.Now.ToString("o")} | {logLevel.ToString().ToUpper()} | Thread:[{Thread.CurrentThread.ManagedThreadId}] | {_categoryName}[{eventId.Id}]: {formatter(state, exception)}");
                 Console.ResetColor();
-                Console.Write("]");
-
-                Console.ForegroundColor = logLevel == LogLevel.Information
-                ? ConsoleColor.Green
-                : logLevel == LogLevel.Warning
-                    ? ConsoleColor.Yellow
-                    : logLevel == LogLevel.Error
-                        ? ConsoleColor.DarkRed
-                        : logLevel == LogLevel.Critical
-                            ? ConsoleColor.Magenta
-                            : ConsoleColor.Blue;
-
-                Console.Write($" {logLevel}");
-
-                Console.ResetColor();
-                Console.Write($": {_categoryName}[");
-
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write($"{eventId.Id}");
-
-                Console.ResetColor();
-                Console.Write($"]: {formatter(state, exception)}");
             }
         }
     }

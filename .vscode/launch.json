@@ -8,7 +8,7 @@
         "type": "coreclr",
         "request": "launch",
         "preLaunchTask": "build",
-        "program": "${workspaceFolder}/Worker/bin/Debug/netcoreapp3.1/Worker.dll",
+        "program": "${workspaceFolder}/src/Worker/bin/Debug/netcoreapp3.1/Worker.dll",
         "args": [],
         "cwd": "${workspaceFolder}",
         "console": "internalConsole",

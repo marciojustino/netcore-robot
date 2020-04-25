@@ -14,8 +14,9 @@ namespace Domain.Services
 
         public async Task Process()
         {
-            _logger.LogTrace("[JobobService__Process] Starting MyService");
-            await Task.Delay(4000);
+            _logger.LogTrace("[MyService__Process] MyService start");
+            await Task.Delay(2000);
+            _logger.LogTrace("[MyService__Process] MyService finish");
         }
     }
 }
