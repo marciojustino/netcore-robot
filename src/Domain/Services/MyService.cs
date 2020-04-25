@@ -15,7 +15,7 @@ namespace Domain.Services
         public async Task Process()
         {
             _logger.LogTrace("[MyService__Process] MyService start");
-            await Task.Delay(2000);
+            await Task.Delay(1000);
             _logger.LogTrace("[MyService__Process] MyService finish");
         }
     }

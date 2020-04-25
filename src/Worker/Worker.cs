@@ -36,7 +36,7 @@ namespace Worker
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogTrace("[Worker__ExecuteAsync] Worker running | Interval={interval} milliseconds", _workerConfigurations.Interval);
-                await _myService.Process();
+                _myService.Process();
                 await Task.Delay(_workerConfigurations.Interval == 0 ? 1000 : _workerConfigurations.Interval, stoppingToken);
             }
         }
