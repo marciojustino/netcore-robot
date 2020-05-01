@@ -1,3 +1,4 @@
 {
-    "msbuildProjectTools.nuget.includePreRelease": false
+    "msbuildProjectTools.nuget.includePreRelease": false,
+    "editor.fontFamily": "'consolas nf'"
 }
