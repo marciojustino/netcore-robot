@@ -2,13 +2,13 @@ namespace Worker
 {
     using System.Threading.Tasks;
     using System.Threading;
+    using System;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Abstraction.Configurations;
     using Domain.Services;
-    using System;
 
     public class Worker : BackgroundService
     {
