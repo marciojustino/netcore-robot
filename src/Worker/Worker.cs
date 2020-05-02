@@ -1,13 +1,14 @@
 namespace Worker
 {
-    using System.Threading;
     using System.Threading.Tasks;
-    using Abstraction.Configurations;
-    using Domain.Services;
+    using System.Threading;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using Abstraction.Configurations;
+    using Domain.Services;
+    using System;
 
     public class Worker : BackgroundService
     {
@@ -15,10 +16,11 @@ namespace Worker
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly IConfiguration _configurations;
         private readonly WorkerConfigurations _workerConfigurations;
-        private readonly IMyService _myService;
+        private readonly IProfileService _profileService;
 
-        public Worker(ILogger<Worker> logger,
-                      IServiceScopeFactory scopeFactory)
+        public Worker(
+            ILogger<Worker> logger,
+            IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
             _serviceScopeFactory = scopeFactory;
@@ -28,7 +30,7 @@ namespace Worker
             _workerConfigurations = scope.ServiceProvider.GetRequiredService<WorkerConfigurations>();
             _configurations.GetSection("Worker").Bind(_workerConfigurations);
             // Services
-            _myService = scope.ServiceProvider.GetRequiredService<IMyService>();
+            _profileService = scope.ServiceProvider.GetRequiredService<IProfileService>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,7 +38,7 @@ namespace Worker
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogTrace("[Worker__ExecuteAsync] Worker running | Interval={interval} milliseconds", _workerConfigurations.Interval);
-                _myService.Process();
+                await _profileService.Get(new Guid());
                 await Task.Delay(_workerConfigurations.Interval == 0 ? 1000 : _workerConfigurations.Interval, stoppingToken);
             }
         }

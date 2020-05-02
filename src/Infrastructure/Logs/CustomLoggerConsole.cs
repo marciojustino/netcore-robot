@@ -1,4 +1,4 @@
-namespace Worker
+namespace Infrastructure.Logs
 {
     using System;
     using System.Collections.Generic;
