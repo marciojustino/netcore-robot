@@ -6,6 +6,8 @@ namespace Worker
     using Abstraction.Configurations;
     using Domain.Services;
     using Infrastructure.Logs;
+    using Infrastructure.Repositories;
+    using Abstraction.Entities;
 
     public class Program
     {
@@ -24,6 +26,7 @@ namespace Worker
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddScoped<WorkerConfigurations>();
+                    services.AddTransient<IRepository<Profile>, ProfileRepository>();
                     services.AddTransient<IProfileService, ProfileService>();
                     services.AddHostedService<Worker>();
                 });

@@ -9,6 +9,7 @@ namespace Worker
     using Microsoft.Extensions.Logging;
     using Abstraction.Configurations;
     using Domain.Services;
+    using Amazon.SQS;
 
     public class Worker : BackgroundService
     {
@@ -31,6 +32,9 @@ namespace Worker
             _configurations.GetSection("Worker").Bind(_workerConfigurations);
             // Services
             _profileService = scope.ServiceProvider.GetRequiredService<IProfileService>();
+
+            var sqsOptions = _configurations.GetAWSOptions("Aws:Sqs");
+            var client = sqsOptions.CreateServiceClient<IAmazonSQS>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
